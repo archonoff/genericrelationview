@@ -15,21 +15,13 @@ class GenericAdminMixin(object):
         request = kwargs.pop("request", None)
         for (content_type, object_id) in self.generic_pairs:
             if db_field.name == content_type:
-                return self.formfield_for_content_type(
-                    db_field, object_id, content_type, **kwargs
-                )
+                return self.formfield_for_content_type(db_field, object_id, content_type, request, **kwargs)
             elif db_field.name == object_id:
                 return self.formfield_for_object_id(db_field, **kwargs)
-        return super(
-            GenericAdminMixin, self
-        ).formfield_for_dbfield(db_field, **save_kwargs)
+        return super(GenericAdminMixin, self).formfield_for_dbfield(db_field, **save_kwargs)
 
-    def formfield_for_content_type(
-        self, db_field, object_id, content_type, **kwargs
-    ):
-        formfield = super(
-            GenericAdminMixin, self
-        ).formfield_for_foreignkey(db_field, **kwargs)
+    def formfield_for_content_type(self, db_field, object_id, content_type, request, **kwargs):
+        formfield = super(GenericAdminMixin, self).formfield_for_foreignkey(db_field, request, **kwargs)
         widget = formfield.widget
         url = reverse('generickey_json')
         widget.attrs.update({
@@ -45,5 +37,6 @@ class GenericAdminMixin(object):
 
     class Media:
         js = (
+            '//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js',
             'js/admin/generickey.js',
         )
